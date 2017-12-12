@@ -1,18 +1,25 @@
 require "singleton"
+require 'byebug'
 
 module Stepable
-  def moves
-    move_diffs
+  def valid_moves(board)
+    moves(board).map do |diff|
+      x = @location[0] + diff[0]
+      y = @location[1] + diff[1]
+      [x, y]
+    end
   end
 
   def is_valid_move?(board, move_diff)
     x = @location[0] + move_diff[0]
     y = @location[1] + move_diff[1]
-    ((x < 0 || x > 7) || (y < 0 || y > 7)) ||
-    board[x, y].color == @color
+    return false if x < 0 || x > 7
+    return false if y < 0 || y > 7
+    return false if board[[x, y]].color == @color
+    true
   end
 
-  def valid_moves(board)
+  def moves(board)
     move_diffs.select do |diff|
       is_valid_move?(board, diff)
     end
@@ -56,7 +63,10 @@ module Slideable
       i += 1
       pos = [@location[0] + dir[0] * i, @location[1] + dir[1] * i]
     end
-    result << pos unless board[pos].color == @color
+    unless board[pos].nil?
+      result << pos unless board[pos].color == @color
+    end
+    result
   end
 end
 

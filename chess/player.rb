@@ -20,15 +20,24 @@ class HumanPlayer < Player
     to_pos = []
     while from_pos.empty?
       input = @display.cursor.get_input
-      #raise "Not your piece" unless @display.board[input].color == @color
       @display.render
+      if input == :space
+        break
+      end
       if input == :tab
+        
         from_pos = @display.cursor.cursor_pos
+        unless @display.board[from_pos].color == @color
+          from_pos = []
+        end
       end
     end
     while to_pos.empty?
       input = @display.cursor.get_input
       @display.render
+      if input == :space
+        break
+      end
       if input == :tab
         to_pos = @display.cursor.cursor_pos
       end

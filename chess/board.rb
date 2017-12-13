@@ -1,5 +1,6 @@
 require_relative "piece"
 require_relative "display"
+require "byebug"
 
 
 class Board
@@ -21,8 +22,35 @@ class Board
     @grid[x][y] = piece
   end
 
-  def dup()
-
+  def dup
+    board_copy = Board.new
+    board_copy.grid.each_with_index do |row, idx|
+      row.each_index do |jdx|
+        case board_copy[[idx, jdx]].symbol
+        when :king
+          board_copy[[idx, jdx]] = King.new([idx, jdx], self[[idx, jdx]].color)
+          board_copy[[idx, jdx]].symbol = self[[idx, jdx]].symbol
+        when :queen
+          board_copy[[idx, jdx]] = Queen.new([idx, jdx], self[[idx, jdx]].color)
+          board_copy[[idx, jdx]].symbol = self[[idx, jdx]].symbol
+        when :knight
+          board_copy[[idx, jdx]] = Knight.new([idx, jdx], self[[idx, jdx]].color)
+          board_copy[[idx, jdx]].symbol = self[[idx, jdx]].symbol
+        when :bishop
+          board_copy[[idx, jdx]] = Bishop.new([idx, jdx], self[[idx, jdx]].color)
+          board_copy[[idx, jdx]].symbol = self[[idx, jdx]].symbol
+        when :rook
+          board_copy[[idx, jdx]] = Rook.new([idx, jdx], self[[idx, jdx]].color)
+          board_copy[[idx, jdx]].symbol = self[[idx, jdx]].symbol
+        when :pawn
+          board_copy[[idx, jdx]] = Pawn.new([idx, jdx], self[[idx, jdx]].color)
+          board_copy[[idx, jdx]].symbol = self[[idx, jdx]].symbol
+        when :null
+          board_copy[[idx, jdx]] = @null_piece
+        end
+      end
+    end
+    board_copy
   end
 
   def move_piece!(from_pos, to_pos)
@@ -39,8 +67,37 @@ class Board
     end
   end
 
-  def checkmate?
+  def checkmate?(color)
+    if check?(find_king(color))
+      board_copy = dup
+      king = board_copy.find_king(color)
+      board_copy.get_pieces(color) do |piece|
+        piece.valid_moves(board_copy).each do |move|
+          loc = piece.location
+          board_copy.move_piece!(loc, move)
+          return false unless board_copy.check?(king)
+          board_copy.move_piece!(move, loc)
+        end
+      end
+      return true
+    end
+    false
+  end
 
+  def check?(king)
+    other_color = (king.color == :white ? :black : :white)
+    other_pieces = get_pieces(other_color)
+    other_pieces.each do |piece|
+      piece.valid_moves(self).each do |move|
+        return true if move == king.location
+      end
+    end
+    false
+  end
+
+
+  def get_pieces(color)
+    @grid.flatten.select { |piece| piece.color == color }
   end
 
   protected
@@ -88,7 +145,7 @@ class Board
   end
 
   def find_king(color)
-
+    @grid.flatten.select { |piece| piece.symbol == :king && piece.color == color }.first
   end
 
 end

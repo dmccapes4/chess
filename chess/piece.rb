@@ -63,8 +63,10 @@ module Slideable
       i += 1
       pos = [@location[0] + dir[0] * i, @location[1] + dir[1] * i]
     end
-    unless board[pos].nil?
-      result << pos unless board[pos].color == @color
+    if in_bounds?(pos)
+      unless board[pos].nil?
+        result << pos unless board[pos].color == @color
+      end
     end
     result
   end
@@ -73,8 +75,7 @@ end
 
 class Piece
 
-  attr_reader :symbol, :color
-  attr_accessor :location
+  attr_accessor :location, :symbol, :color
 
   def initialize(location = nil, color = nil)
     @location = location
@@ -93,6 +94,12 @@ class Piece
     x, y = pos
     return true if (x < 0 || x > 7) || (y < 0 || y > 7)
     return false if board[pos].symbol == :null
+    true
+  end
+
+  def in_bounds?(pos)
+    return false if pos[0] < 0 || pos[0] > 7
+    return false if pos[1] < 0 || pos[1] > 7
     true
   end
 
@@ -194,10 +201,13 @@ class Pawn < Piece
     end
     side_attacks.each do |dir|
       pos = [@location[0] + dir[0], @location[1] + dir[1]]
+      next unless in_bounds?(pos)
       moves << pos if board[pos].color != @color
     end
     moves
   end
+
+
 
   protected
   def at_start_row?

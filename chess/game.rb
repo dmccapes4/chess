@@ -16,9 +16,11 @@ class Game
   def play
     @display.render
     notify_players
-    while true
+    #byebug
+    until @board.checkmate?(@current_player.color)
       begin
         move = @current_player.make_move
+        notify_players
         @board.move_piece!(move[0], move[1])
       rescue InvalidMoveError
         retry
@@ -27,6 +29,9 @@ class Game
       notify_players
       swap_turn!
     end
+    puts "#{@current_player.name} loses"
+    swap_turn!
+    puts "#{@current_player.name} wins"
   end
 
   private
